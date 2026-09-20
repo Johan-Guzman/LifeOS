@@ -1,27 +1,91 @@
-import AppLayout from "../../components/layout/AppLayout";
 
-const tasks = [
-  {
-    title: "Complete project documentation",
-    category: "University",
-    priority: "High",
-    status: "Today",
-  },
-  {
-    title: "Review backend architecture",
-    category: "LifeOS",
-    priority: "Medium",
-    status: "Today",
-  },
-  {
-    title: "Study DevOps",
-    category: "University",
-    priority: "Medium",
-    status: "Tomorrow",
-  },
-];
+"use client";
+
+import { useMemo, useState } from "react";
+import AppLayout from "../../components/layout/AppLayout";
+import TaskFilters, {
+  type TaskFilter,
+} from "../../components/tasks/TaskFilters";
+import TaskList from "../../components/tasks/TaskList";
+import TaskModal from "../../components/tasks/TaskModal";
+import { useTasks } from "../../hooks/tasks/useTasks";
+import type { Task } from "../../types/tasks/task";
 
 export default function TasksPage() {
+  const {
+    tasks,
+    loading,
+    error,
+    createTask,
+    updateTask,
+    deleteTask,
+  } = useTasks();
+
+  const [editingTask, setEditingTask] =
+    useState<Task | null>(null);
+
+  const [filter, setFilter] =
+    useState<TaskFilter>("ALL");
+
+  const [modalOpen, setModalOpen] =
+    useState(false);
+
+  const filteredTasks = useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    return tasks.filter((task) => {
+      if (filter === "ALL") {
+        return true;
+      }
+
+      if (!task.dueDate) {
+        return false;
+      }
+
+      const dueDate = new Date(
+        `${task.dueDate}T00:00:00`
+      );
+
+      dueDate.setHours(0, 0, 0, 0);
+
+      if (filter === "TODAY") {
+        return dueDate.getTime() === today.getTime();
+      }
+
+      return dueDate.getTime() > today.getTime();
+    });
+  }, [tasks, filter]);
+
+  const handleToggleTask = async (task: Task) => {
+    await updateTask(task.id, {
+      title: task.title,
+      description:
+        task.description ?? undefined,
+      status:
+        task.status === "COMPLETED"
+          ? "TODO"
+          : "COMPLETED",
+      priority: task.priority,
+      estimatedMinutes:
+        task.estimatedMinutes ?? undefined,
+      dueDate: task.dueDate ?? undefined,
+    });
+  };
+
+  const handleEditTask = (task: Task) => {
+    setEditingTask(task);
+  };
+
+  const handleDeleteTask = async (task: Task) => {  
+  await deleteTask(task.id);
+};
+
+  const handleCloseModal = () => {
+    setModalOpen(false);
+    setEditingTask(null);
+  };
+
   return (
     <AppLayout>
       <section>
@@ -40,81 +104,78 @@ export default function TasksPage() {
             </p>
           </div>
 
-          <button className="shrink-0 rounded-full bg-black px-4 py-2.5 text-xs font-medium text-white transition hover:bg-black/80 sm:px-5">
+          <button
+            type="button"
+            onClick={() => {
+              setEditingTask(null);
+              setModalOpen(true);
+            }}
+            className="shrink-0 rounded-full bg-black px-4 py-2.5 text-xs font-medium text-white transition hover:bg-black/80 sm:px-5"
+          >
             <span className="sm:hidden">+</span>
-            <span className="hidden sm:inline">New task</span>
+
+            <span className="hidden sm:inline">
+              New task
+            </span>
           </button>
         </div>
 
-        <div className="mb-5 -mx-1 flex gap-1 overflow-x-auto px-1 pb-1">
-          <button className="shrink-0 rounded-full bg-black px-4 py-2 text-xs font-medium text-white">
-            All
-          </button>
+        <TaskFilters
+          activeFilter={filter}
+          onFilterChange={setFilter}
+        />
 
-          <button className="shrink-0 rounded-full px-4 py-2 text-xs text-black/45 transition hover:bg-black/[0.05] hover:text-black">
-            Today
-          </button>
-
-          <button className="shrink-0 rounded-full px-4 py-2 text-xs text-black/45 transition hover:bg-black/[0.05] hover:text-black">
-            Upcoming
-          </button>
-        </div>
-
-        <div className="overflow-hidden rounded-2xl border border-black/[0.06] bg-white">
-          <div className="divide-y divide-black/[0.05]">
-            {tasks.map((task) => (
-              <div
-                key={task.title}
-                className="flex items-start gap-3 px-4 py-4 transition hover:bg-black/[0.015] sm:items-center sm:gap-4 sm:px-6 sm:py-5"
-              >
-                <button
-                  aria-label={`Complete ${task.title}`}
-                  className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-black/20 transition hover:border-black sm:mt-0"
-                />
-
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium leading-5 text-black">
-                    {task.title}
-                  </p>
-
-                  <div className="mt-1.5 flex flex-wrap items-center gap-1.5 text-[11px] text-black/35 sm:text-xs">
-                    <span>{task.category}</span>
-                    <span>·</span>
-                    <span>{task.status}</span>
-                  </div>
-                </div>
-
-                <span
-                  className={`hidden rounded-full px-3 py-1 text-[11px] font-medium sm:block ${
-                    task.priority === "High"
-                      ? "bg-black/[0.07] text-black"
-                      : "bg-black/[0.04] text-black/45"
-                  }`}
-                >
-                  {task.priority}
-                </span>
-
-                <button
-                  aria-label={`More options for ${task.title}`}
-                  className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-lg leading-none text-black/25 transition hover:bg-black/[0.05] hover:text-black"
-                >
-                  ···
-                </button>
-              </div>
-            ))}
+        {loading && (
+          <div className="rounded-2xl border border-black/[0.06] bg-white px-6 py-10 text-center text-sm text-black/35">
+            Loading tasks...
           </div>
-        </div>
+        )}
 
-        <div className="mt-5 flex items-center justify-between px-1">
-          <p className="text-xs text-black/30">
-            3 tasks
-          </p>
+        {!loading && error && (
+          <div className="rounded-2xl border border-black/[0.06] bg-white px-6 py-10 text-center text-sm text-black/45">
+            {error}
+          </div>
+        )}
 
-          <button className="text-xs text-black/40 transition hover:text-black">
-            Manage
-          </button>
-        </div>
+        {!loading && !error && (
+          <>
+            <TaskList
+              tasks={filteredTasks}
+              onToggle={handleToggleTask}
+              onEdit={handleEditTask}
+              onDelete={handleDeleteTask}
+            />
+
+            <div className="mt-5 flex items-center justify-between px-1">
+              <p className="text-xs text-black/30">
+                {filteredTasks.length}{" "}
+                {filteredTasks.length === 1
+                  ? "task"
+                  : "tasks"}
+              </p>
+
+              <button
+                type="button"
+                className="text-xs text-black/40 transition hover:text-black"
+              >
+                Manage
+              </button>
+            </div>
+          </>
+        )}
+
+        <TaskModal
+          open={
+            modalOpen ||
+            editingTask !== null
+          }
+          task={editingTask}
+          onClose={handleCloseModal}
+          onCreate={createTask}
+          onUpdate={updateTask}
+        />
       </section>
     </AppLayout>
   );
 }
+

@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useAuth } from "../../context/AuthContext";
 
 export default function Header() {
   const [date, setDate] = useState("");
+  const { user, logout } = useAuth();
 
   useEffect(() => {
     const formatter = new Intl.DateTimeFormat("en-US", {
@@ -23,15 +25,17 @@ export default function Header() {
         </p>
 
         <h2 className="truncate text-[13px] font-medium text-black sm:text-sm">
-          Good morning, Johan
+          Good morning, {user?.name ?? "there"}
         </h2>
       </div>
 
       <button
-        aria-label="Open profile"
+        type="button"
+        onClick={logout}
+        aria-label="Sign out"
         className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-black text-[11px] font-semibold text-white shadow-sm transition hover:bg-black/80 sm:h-9 sm:w-9 sm:text-xs"
       >
-        J
+        {user?.name?.charAt(0).toUpperCase() ?? "U"}
       </button>
     </header>
   );
