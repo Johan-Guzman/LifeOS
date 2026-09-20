@@ -1,0 +1,1 @@
+package com.lifeos.goals.dto;import com.lifeos.goals.*;import jakarta.validation.constraints.*;import java.time.*;public record GoalRequest(@NotBlank@Size(max=200)String title,@Size(max=5000)String description,LocalDate targetDate,@NotNull GoalStatus status,@NotNull@Min(0)@Max(100)Integer progress){}

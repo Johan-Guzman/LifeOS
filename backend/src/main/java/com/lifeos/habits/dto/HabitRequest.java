@@ -1,0 +1,1 @@
+package com.lifeos.habits.dto;import com.lifeos.habits.HabitFrequency;import jakarta.validation.constraints.*;public record HabitRequest(@NotBlank @Size(max=150)String name,@Size(max=5000)String description,@NotNull HabitFrequency frequency,@NotNull @Min(1)@Max(7)Integer targetPerWeek,@NotNull @Min(0)Integer currentStreak,@NotNull @Min(0)Integer longestStreak,boolean active){}

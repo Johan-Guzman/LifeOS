@@ -1,0 +1,1 @@
+package com.lifeos.expenses.dto;import com.lifeos.expenses.*;import jakarta.validation.constraints.*;import java.math.*;import java.time.*;public record ExpenseRequest(@NotBlank@Size(max=500)String description,@NotNull@DecimalMin(value="0.01")@Digits(integer=17,fraction=2)BigDecimal amount,@NotNull ExpenseCategory category,@NotNull LocalDate expenseDate){}

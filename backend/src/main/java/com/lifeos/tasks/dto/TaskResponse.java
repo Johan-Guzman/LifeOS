@@ -1,0 +1,2 @@
+package com.lifeos.tasks.dto; import com.lifeos.tasks.*; import java.time.*;
+public record TaskResponse(Long id,String title,String description,TaskStatus status,TaskPriority priority,Integer estimatedMinutes,LocalDate dueDate,LocalDateTime completedAt,LocalDateTime createdAt,LocalDateTime updatedAt){ public static TaskResponse from(Task t){return new TaskResponse(t.getId(),t.getTitle(),t.getDescription(),t.getStatus(),t.getPriority(),t.getEstimatedMinutes(),t.getDueDate(),t.getCompletedAt(),t.getCreatedAt(),t.getUpdatedAt());}}

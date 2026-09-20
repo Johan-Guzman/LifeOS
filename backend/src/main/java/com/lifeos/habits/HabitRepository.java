@@ -1,0 +1,1 @@
+package com.lifeos.habits;import org.springframework.data.jpa.repository.JpaRepository;import java.util.*;public interface HabitRepository extends JpaRepository<Habit,Long>{List<Habit> findAllByUserIdOrderByCreatedAtDesc(Long id);Optional<Habit> findByIdAndUserId(Long id,Long userId);}

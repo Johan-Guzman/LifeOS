@@ -1,0 +1,1 @@
+package com.lifeos.events.dto; import jakarta.validation.constraints.*; import java.time.*; public record EventRequest(@NotBlank @Size(max=200) String title,@Size(max=5000) String description,@NotNull LocalDateTime startDateTime,@NotNull LocalDateTime endDateTime,@Size(max=300) String location){}

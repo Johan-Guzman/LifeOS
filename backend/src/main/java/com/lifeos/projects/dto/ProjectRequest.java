@@ -1,0 +1,1 @@
+package com.lifeos.projects.dto;import com.lifeos.projects.*;import jakarta.validation.constraints.*;import java.time.*;public record ProjectRequest(@NotBlank@Size(max=200)String name,@Size(max=5000)String description,@NotNull ProjectStatus status,LocalDate startDate,LocalDate targetDate){}

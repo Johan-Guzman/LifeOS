@@ -1,0 +1,1 @@
+package com.lifeos.projects;import org.springframework.data.jpa.repository.JpaRepository;import java.util.*;public interface ProjectRepository extends JpaRepository<Project,Long>{List<Project>findAllByUserIdOrderByCreatedAtDesc(Long id);Optional<Project>findByIdAndUserId(Long id,Long userId);}
